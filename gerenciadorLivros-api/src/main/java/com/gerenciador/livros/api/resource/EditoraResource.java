@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class EditoraResource {
 	}
 	
 	@PostMapping
-	public ResponseEntity<Editora> criar(@RequestBody Editora editora, HttpServletResponse response) {
+	public ResponseEntity<Editora> criar(@Valid @RequestBody Editora editora, HttpServletResponse response) {
 		Editora editoraSalva = editoraRepository.save(editora);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(editoraSalva.getId()).toUri();
 		response.setHeader("Location", uri.toASCIIString());
@@ -40,8 +41,9 @@ public class EditoraResource {
 	}
 	
 	@GetMapping("/{id}")
-	public Optional<Editora> buscaPorId(@PathVariable Long id) {
-		return editoraRepository.findById(id);
+	public ResponseEntity<?> buscaPorId(@PathVariable Long id) {
+		Optional<Editora> editora = editoraRepository.findById(id);
+		return editora.isPresent() ? ResponseEntity.ok().body(editora.get()) : ResponseEntity.notFound().build();
 	}
 
 }
